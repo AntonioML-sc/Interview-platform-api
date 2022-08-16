@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('positions', function (Blueprint $table) {
-            $table->uuid('id');
+            $table->uuid('id')->primary();
             $table->uuid('company_id')->nullable(false);
             $table->foreign('company_id')
                 ->references('id')
