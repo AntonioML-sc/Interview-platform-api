@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use App\Traits\Uuids;
 
-class Test extends Model
+class SkillMark extends Model
 {
     use HasFactory, Uuids;
 
@@ -15,13 +15,13 @@ class Test extends Model
 
     // relationships
 
-    public function users()
+    public function test()
     {
-        return $this->belongsToMany(User::class)->using(TestUser::class);
+        return $this->belongsTo(Test::class);
     }
 
-    public function skillMarks()
+    public function skill()
     {
-        return $this->hasMany(SkillMark::class);
+        return $this->belongsTo(Skill::class);
     }
 }
