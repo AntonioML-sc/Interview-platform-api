@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use App\Traits\Uuids;
 
-class Company extends Model
+class Position extends Model
 {
     use HasFactory, Uuids;
 
@@ -15,8 +15,8 @@ class Company extends Model
 
     // relationships
 
-    public function positions()
+    public function company()
     {
-        return $this->hasMany(Position::class);
+        return $this->belongsTo(Company::class);
     }
 }
