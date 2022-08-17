@@ -77,4 +77,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(Skill::class)->using(SkillUser::class);
     }
+
+    public function applications()
+    {
+        return $this->hasMany(Application::class);
+    }
 }
