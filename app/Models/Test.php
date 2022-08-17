@@ -12,4 +12,11 @@ class Test extends Model
     use HasFactory, Uuids;
 
     protected $primaryKey = 'id';
+
+    // relationships
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class)->using(TestUser::class);
+    }
 }
