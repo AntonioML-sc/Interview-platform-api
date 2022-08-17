@@ -9,9 +9,13 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
+use App\Traits\Uuids;
+
 class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Uuids;
+
+    protected $primaryKey = 'id';
 
     /**
      * The attributes that are mass assignable.
@@ -19,9 +23,13 @@ class User extends Authenticatable implements JWTSubject
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
+        'phone',
+        'title',
+        'description'
     ];
 
     /**
@@ -31,7 +39,6 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
     /**
@@ -57,5 +64,12 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    // relationships
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
     }
 }
