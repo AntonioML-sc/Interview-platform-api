@@ -26,4 +26,5 @@ Route::group(["middleware" => "jwt.auth"] , function() {
     Route::get('/my-profile', [AuthController::class, 'myProfile']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::put('/my-profile/update', [AuthController::class, 'updateMyProfile']);
+    Route::put('/my-profile/delete', [AuthController::class, 'deleteMyAccount']);
 });
