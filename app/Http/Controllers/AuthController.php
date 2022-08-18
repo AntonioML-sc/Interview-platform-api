@@ -101,9 +101,21 @@ class AuthController extends Controller
                 );
             }
 
+            $userStatus = auth()->user()->status;
+
+            if ($userStatus == 'deleted') {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Invalid Email or Password',
+                    ],
+                    Response::HTTP_UNAUTHORIZED
+                );
+            }
+
             return response()->json([
                 'success' => true,
-                'token' => $jwt_token,
+                'token' => $jwt_token
             ]);
         } catch (\Exception $exception) {
 
@@ -273,6 +285,8 @@ class AuthController extends Controller
             $user->status = 'deleted';
 
             $user->save();
+            
+            JWTAuth::invalidate(auth());
 
             return response()->json(
                 [
