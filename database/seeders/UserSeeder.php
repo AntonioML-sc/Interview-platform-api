@@ -25,7 +25,8 @@ class UserSeeder extends Seeder
                 'password' => bcrypt('1234AaB!'),
                 'phone' => '+34 666 555 444',
                 'title' => 'Recruiter',
-                'description' => 'Hiring'
+                'description' => 'Hiring',
+                'status' => 'active'
             ]
         );
 
@@ -39,7 +40,8 @@ class UserSeeder extends Seeder
                 'password' => bcrypt('1234AaB!'),
                 'phone' => '+34 777 555 444',
                 'title' => 'Software developer',
-                'description' => 'Interested in science and technology and open to work'
+                'description' => 'Interested in science and technology and open to work',
+                'status' => 'active'
             ]
         );
 
@@ -53,7 +55,8 @@ class UserSeeder extends Seeder
                 'password' => bcrypt('1234AaB!'),
                 'phone' => '+44 666 888 222',
                 'title' => 'Software developer',
-                'description' => 'Interested in science and technology and open to work'
+                'description' => 'Interested in science and technology and open to work',
+                'status' => 'active'
             ]
         );
     }
