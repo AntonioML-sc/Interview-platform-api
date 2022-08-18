@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('phone');
             $table->string('title');
             $table->text('description');
+            $table->string('status');
             $table->timestamps();
         });
     }
