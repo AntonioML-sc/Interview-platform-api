@@ -60,6 +60,7 @@ class AuthController extends Controller
                 'phone' => $request->get('phone'),
                 'title' =>  $request->get('title'),
                 'description' =>  $request->get('description'),
+                'status' => 'active'
             ]);
 
             $token = JWTAuth::fromUser($user);
