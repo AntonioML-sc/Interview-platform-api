@@ -117,4 +117,11 @@ class AuthController extends Controller
             );
         }
     }
+
+    public function myProfile()
+    {
+        $user = auth()->user();
+        Log::info('User ' . $user->email . 'has consulted their personal profile');
+        return response()->json($user);
+    }
 }

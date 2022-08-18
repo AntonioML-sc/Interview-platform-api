@@ -21,3 +21,7 @@ Route::get('/', function() { return "api root"; });
 // authentication routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::group(["middleware" => "jwt.auth"] , function() {
+    Route::get('/my-profile', [AuthController::class, 'myProfile']);
+});
