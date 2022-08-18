@@ -20,4 +20,4 @@ Route::get('/', function() { return "api root"; });
 
 // authentication routes
 Route::post('/register', [AuthController::class, 'register']);
-
+Route::post('/login', [AuthController::class, 'login']);
