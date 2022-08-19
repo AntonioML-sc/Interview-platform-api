@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompanyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,3 +29,7 @@ Route::group(["middleware" => "jwt.auth"] , function() {
     Route::put('/my-profile/update', [AuthController::class, 'updateMyProfile']);
     Route::put('/my-profile/delete', [AuthController::class, 'deleteMyAccount']);
 });
+
+// company routes
+
+Route::get('/companies/get-all', [CompanyController::class, 'getAll']);
