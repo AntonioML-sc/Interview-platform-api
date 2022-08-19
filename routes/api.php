@@ -34,3 +34,7 @@ Route::group(["middleware" => "jwt.auth"] , function() {
 
 Route::get('/companies/get-all', [CompanyController::class, 'getAll']);
 Route::get('/companies/get-by-name/{name}', [CompanyController::class, 'getByName']);
+
+Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function() {
+    Route::post('/companies/new', [CompanyController::class, 'newCompany']);
+});

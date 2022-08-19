@@ -71,4 +71,61 @@ class CompanyController extends Controller
             );
         }
     }
+
+    public function newCompany(Request $request)
+    {
+        // creates a new register in companies using info provided by request body. Recruiters only.
+        try {
+
+            Log::info('registering a new company');
+
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255|unique:companies',
+                'address' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:companies',
+                'description' => 'required|string|max:255',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => $validator->errors()
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            $company = new Company();
+
+            $company->name = $request->input('name');
+            $company->address = $request->input('address');
+            $company->email = $request->input('email');
+            $company->description = $request->input('description');
+            $company->status = 'active';
+
+            $company->save();
+
+            Log::info('New company registered: ' . $company->name);
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'New company added'
+                ],
+                Response::HTTP_CREATED
+            );
+        } catch (\Exception $exception) {
+
+            Log::error('Error adding new company: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error adding new company'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }
