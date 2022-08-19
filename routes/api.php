@@ -33,3 +33,4 @@ Route::group(["middleware" => "jwt.auth"] , function() {
 // company routes
 
 Route::get('/companies/get-all', [CompanyController::class, 'getAll']);
+Route::get('/companies/get-by-name/{name}', [CompanyController::class, 'getByName']);

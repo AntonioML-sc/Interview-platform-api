@@ -32,7 +32,40 @@ class CompanyController extends Controller
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error retrieving games'
+                    'message' => 'Error retrieving companies'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function getByName($name)
+    {
+        try {
+
+            Log::info("Retrieving companies by name");
+
+            $companies = Company::query()
+                ->where('name', 'like', '%' . $name . '%')
+                ->orderBy('name', 'asc')
+                ->get()
+                ->toArray();
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Companies retrieved successfully',
+                    'data' => $companies
+                ]
+            );
+        } catch (\Exception $exception) {
+
+            Log::error("Error retrieving companies by name" . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error retrieving companies by name'
                 ],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
