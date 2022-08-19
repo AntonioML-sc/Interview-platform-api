@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\SkillController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,7 +32,6 @@ Route::group(["middleware" => "jwt.auth"] , function() {
 });
 
 // company routes
-
 Route::get('/companies/get-all', [CompanyController::class, 'getAll']);
 Route::get('/companies/get-by-name/{name}', [CompanyController::class, 'getByName']);
 
@@ -39,3 +39,6 @@ Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function() {
     Route::post('/companies/new', [CompanyController::class, 'newCompany']);
     Route::put('/companies/update/{companyId}', [CompanyController::class, 'updateCompany']);
 });
+
+// skill routes
+Route::get('/skills/get-all', [SkillController::class, 'getAll']);
