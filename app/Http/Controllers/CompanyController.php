@@ -128,4 +128,97 @@ class CompanyController extends Controller
             );
         }
     }
+
+    public function updateCompany(Request $request, $companyId)
+    {
+        // update data of an existing company. It can also act as a logical deletion by setting status column to deleted
+        try {
+
+            Log::info('updating company');
+
+            // validate data provided by request body
+            $validator = Validator::make($request->all(), [
+                'name' => 'string|max:255|unique:companies',
+                'address' => 'string|max:255',
+                'email' => 'string|email|max:255|unique:companies',
+                'description' => 'string|max:255',
+                'status' => 'string|max:255|in:active,deleted'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => $validator->errors()
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            $company = Company::query()->find($companyId);
+
+            // check if the company exists
+            if (!$company) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Invalid company id'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // edit the company fields with the values provided
+
+            $name = $request->input('name');
+            $email = $request->input('email');
+            $address = $request->input('address');
+            $description = $request->input('description');
+            $status = $request->input('status');
+            
+            if (isset($name)) {
+                $company->name = $name;
+            }
+
+            if (isset($email)) {
+                $company->email = $email;
+            }
+            
+            if (isset($address)) {
+                $company->address = $address;
+            }
+            
+            if (isset($description)) {
+                $company->description = $description;
+            }
+            
+            if (isset($status)) {
+                $company->status = $status;
+            }
+
+            $company->save();
+
+            Log::info('Company data updated: ' . $company->id);
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Company updated successfully',
+                    'data' => $company
+                ]
+            );
+
+        } catch (\Exception $exception) {
+
+            Log::error('Error updating company: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error updating company'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }
