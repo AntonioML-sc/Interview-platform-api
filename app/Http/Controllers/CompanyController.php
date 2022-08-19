@@ -12,11 +12,15 @@ class CompanyController extends Controller
 {
     public function getAll()
     {
+        // retrieve all of the active (not deleted) companies
         try {
 
             Log::info("retrieving companies");
 
-            $companies = Company::all()->toArray();
+            $companies = Company::query()
+                ->whereNot('status', 'deleted')
+                ->get()
+                ->toArray();
 
             return response()->json(
                 [
@@ -41,13 +45,15 @@ class CompanyController extends Controller
 
     public function getByName($name)
     {
+        // look for not deleted registers whose names include the string provided
         try {
 
             Log::info("Retrieving companies by name");
 
             $companies = Company::query()
                 ->where('name', 'like', '%' . $name . '%')
-                ->orderBy('name', 'asc')
+                ->whereNot('status', 'deleted')
+                ->orderBy('name', 'desc')
                 ->get()
                 ->toArray();
 
@@ -79,6 +85,7 @@ class CompanyController extends Controller
 
             Log::info('registering a new company');
 
+            // validate data provided by request body
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255|unique:companies',
                 'address' => 'required|string|max:255',
@@ -96,6 +103,7 @@ class CompanyController extends Controller
                 );
             }
 
+            // create the new company with the values provided
             $company = new Company();
 
             $company->name = $request->input('name');
@@ -169,32 +177,17 @@ class CompanyController extends Controller
             }
 
             // edit the company fields with the values provided
-
             $name = $request->input('name');
             $email = $request->input('email');
             $address = $request->input('address');
             $description = $request->input('description');
             $status = $request->input('status');
-            
-            if (isset($name)) {
-                $company->name = $name;
-            }
 
-            if (isset($email)) {
-                $company->email = $email;
-            }
-            
-            if (isset($address)) {
-                $company->address = $address;
-            }
-            
-            if (isset($description)) {
-                $company->description = $description;
-            }
-            
-            if (isset($status)) {
-                $company->status = $status;
-            }
+            if (isset($name)) $company->name = $name;
+            if (isset($email)) $company->email = $email;
+            if (isset($address)) $company->address = $address;
+            if (isset($description)) $company->description = $description;
+            if (isset($status)) $company->status = $status;
 
             $company->save();
 
@@ -207,7 +200,6 @@ class CompanyController extends Controller
                     'data' => $company
                 ]
             );
-
         } catch (\Exception $exception) {
 
             Log::error('Error updating company: ' . $exception->getMessage());
