@@ -39,4 +39,38 @@ class SkillController extends Controller
             );
         }
     }
+
+    public function getByTitle($title)
+    {
+        // look for registers whose names include the string provided
+        try {
+
+            Log::info("Retrieving skills by title");
+
+            $skills = Skill::query()
+                ->where('title', 'like', '%' . $title . '%')
+                ->orderBy('title', 'desc')
+                ->get()
+                ->toArray();
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Skills retrieved successfully',
+                    'data' => $skills
+                ]
+            );
+        } catch (\Exception $exception) {
+
+            Log::error("Error retrieving skills by title" . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error retrieving skills by title'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }

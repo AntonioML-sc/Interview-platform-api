@@ -42,3 +42,4 @@ Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function() {
 
 // skill routes
 Route::get('/skills/get-all', [SkillController::class, 'getAll']);
+Route::get('/skills/get-by-title/{title}', [SkillController::class, 'getByTitle']);
