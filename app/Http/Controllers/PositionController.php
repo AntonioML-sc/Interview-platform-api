@@ -94,7 +94,7 @@ class PositionController extends Controller
         }
     }
 
-    public function getByTitle($title)
+    public function getByKeyWords($word)
     {
         // look for registers whose names include the string provided
         try {
@@ -102,7 +102,8 @@ class PositionController extends Controller
             Log::info("Retrieving positions by title");
 
             $positions = Position::query()
-                ->where('title', 'like', '%' . $title . '%')
+                ->where('title', 'like', '%' . $word . '%')
+                ->orWhere('description', 'like', '%' . $word . '%')
                 ->orderBy('title', 'desc')
                 ->get()
                 ->toArray();
