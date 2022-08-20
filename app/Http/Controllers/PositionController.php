@@ -217,4 +217,95 @@ class PositionController extends Controller
             );
         }
     }
+
+    public function detachSkill(Request $request)
+    {
+        // remove a skill from the list of required skills of a position, stored in pivot table position_skill
+        try {
+
+            Log::info('Detaching a skill from the requirements of a position');
+
+            // validate data provided by request body
+            $validator = Validator::make($request->all(), [
+                'position_id' => 'required|string|max:36|min:36',
+                'skill_id' => 'required|string|max:36|min:36'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => $validator->errors()
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            $position = Position::find($request->input('position_id'));
+            $skill = Skill::find($request->input('skill_id'));
+
+            // check if the position exists
+            if (!$position) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'The position specified is not in database'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if the skill exists
+            if (!$skill) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'The skill specified is not in database'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if the logged user is the position admin
+            $userId = auth()->user()->id;
+            $positionAdminId = Application::query()
+                ->where('position_id', $position->id)
+                ->where('status', 'admin')
+                ->first()
+                ->user_id;
+
+            if ($userId != $positionAdminId) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'User not allowed to this operation'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // if everything is ok, detach the skill from the position
+            $position->skills()->detach($skill->id);
+
+            Log::info('Skill ' . $skill->title . ' removed from requirements of position ' . $position->title);
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Skill ' . $skill->title . ' removed from  requirements of position ' . $position->title
+                ]
+            );
+        } catch (\Exception $exception) {
+
+            Log::error('Error detaching skill from position: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error detaching skill from position'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }
