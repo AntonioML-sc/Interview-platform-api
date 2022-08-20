@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Skill;
 use App\Models\SkillUser;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -256,8 +257,8 @@ class SkillController extends Controller
                     Response::HTTP_FORBIDDEN
                 );
             }
-            
-            Log::info('Skill about to be deleted: ' . $skill->id .' - ' . $skill->title);
+
+            Log::info('Skill about to be deleted: ' . $skill->id . ' - ' . $skill->title);
 
             $skill->delete();
 
@@ -275,6 +276,70 @@ class SkillController extends Controller
                 [
                     'success' => false,
                     'message' => 'Error deleting skill'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function addKnownSkill(Request $request)
+    {
+        try {
+
+            Log::info('User adding a known skill');
+
+            // Validates skill_id
+            $validator = Validator::make($request->all(), [
+                'skill_id' => 'required|string|max:36|min:36'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors()->toJson(), Response::HTTP_BAD_REQUEST);
+            }
+
+            $skillId = $request->input('skill_id');
+
+            $skill = Skill::find($skillId);
+
+            // check if channel exists
+            if (!$skill) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'The skill specified does not exist'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            $userId = auth()->user()->id;
+
+            $user = User::find($userId);
+            $userHasSkill = $user->skills->contains($skillId);
+
+            // check if user already has the skill. If not, add the skill.
+            if (!$userHasSkill) {
+                $user->skills()->attach($skillId, ['creator' => false]);
+            }
+
+            Log::info('The user ' . $user->email . ' has added the skill ' . $skill->title . ' to their known skills list');
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'The user ' . $user->email . ' has added the skill ' . $skill->title . ' to their known skills list'
+                ],
+                Response::HTTP_OK
+            );
+
+        } catch (\Exception $exception) {
+
+            Log::error('Error adding known skill: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error adding known skill'
                 ],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );

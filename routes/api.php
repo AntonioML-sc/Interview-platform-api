@@ -18,13 +18,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 // presentation
-Route::get('/', function() { return "api root"; });
+Route::get('/', function () {
+    return "api root";
+});
 
 // authentication routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::group(["middleware" => "jwt.auth"] , function() {
+Route::group(["middleware" => "jwt.auth"], function () {
     Route::get('/my-profile', [AuthController::class, 'myProfile']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::put('/my-profile/update', [AuthController::class, 'updateMyProfile']);
@@ -35,7 +37,7 @@ Route::group(["middleware" => "jwt.auth"] , function() {
 Route::get('/companies/get-all', [CompanyController::class, 'getAll']);
 Route::get('/companies/get-by-name/{name}', [CompanyController::class, 'getByName']);
 
-Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function() {
+Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
     Route::post('/companies/new', [CompanyController::class, 'newCompany']);
     Route::put('/companies/update/{companyId}', [CompanyController::class, 'updateCompany']);
 });
@@ -44,8 +46,12 @@ Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function() {
 Route::get('/skills/get-all', [SkillController::class, 'getAll']);
 Route::get('/skills/get-by-title/{title}', [SkillController::class, 'getByTitle']);
 
-Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function() {
+Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
     Route::post('/skills/new', [SkillController::class, 'newSkill']);
     Route::put('/skills/update/{skillId}', [SkillController::class, 'updateSkill']);
     Route::delete('/skills/delete/{skillId}', [SkillController::class, 'deleteSkill']);
+});
+
+Route::group(["middleware" => "jwt.auth"], function () {
+    Route::post('/skills/add-known-skill', [SkillController::class, 'addKnownSkill']);
 });
