@@ -218,4 +218,66 @@ class SkillController extends Controller
             );
         }
     }
+
+    public function deleteSkill($skillId)
+    {
+        // physical deletion of an existing skill
+        try {
+
+            Log::info('deleting skill');
+
+            $skill = Skill::query()->find($skillId);
+
+            // check if the skill really exists in db
+            if (!$skill) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Invalid skill id'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // only the creator of the skill is allowed to delete it
+            $userId = auth()->user()->id;
+            $userIsCreator = SkillUser::query()
+                ->where('skill_id', $skillId)
+                ->where('user_id', $userId)
+                ->first()
+                ->creator;
+
+            if (!$userIsCreator) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'User not authorized'
+                    ],
+                    Response::HTTP_FORBIDDEN
+                );
+            }
+            
+            Log::info('Skill about to be deleted: ' . $skill->id .' - ' . $skill->title);
+
+            $skill->delete();
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Skill deleted successfully'
+                ]
+            );
+        } catch (\Exception $exception) {
+
+            Log::error('Error deleting skill: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error deleting skill'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }

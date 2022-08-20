@@ -47,4 +47,5 @@ Route::get('/skills/get-by-title/{title}', [SkillController::class, 'getByTitle'
 Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function() {
     Route::post('/skills/new', [SkillController::class, 'newSkill']);
     Route::put('/skills/update/{skillId}', [SkillController::class, 'updateSkill']);
+    Route::delete('/skills/delete/{skillId}', [SkillController::class, 'deleteSkill']);
 });
