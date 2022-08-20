@@ -54,4 +54,5 @@ Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
 
 Route::group(["middleware" => "jwt.auth"], function () {
     Route::post('/skills/add-known-skill', [SkillController::class, 'addKnownSkill']);
+    Route::post('/skills/remove-known-skill', [SkillController::class, 'removeKnownSkill']);
 });

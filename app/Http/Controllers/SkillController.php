@@ -301,7 +301,7 @@ class SkillController extends Controller
 
             $skill = Skill::find($skillId);
 
-            // check if channel exists
+            // check if the skill exists
             if (!$skill) {
                 return response()->json(
                     [
@@ -331,7 +331,6 @@ class SkillController extends Controller
                 ],
                 Response::HTTP_OK
             );
-
         } catch (\Exception $exception) {
 
             Log::error('Error adding known skill: ' . $exception->getMessage());
@@ -340,6 +339,63 @@ class SkillController extends Controller
                 [
                     'success' => false,
                     'message' => 'Error adding known skill'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function removeKnownSkill(Request $request)
+    {
+        try {
+
+            Log::info('User removing a known skill');
+
+            // Validates skill_id
+            $validator = Validator::make($request->all(), [
+                'skill_id' => 'required|string|max:36|min:36'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors()->toJson(), Response::HTTP_BAD_REQUEST);
+            }
+
+            $skillId = $request->input('skill_id');
+            $skill = Skill::find($skillId);
+
+            // check if the skill exists
+            if (!$skill) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'The skill specified does not exist'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // remove the skill from the user known skill table.
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            $user->skills()->detach($skillId);
+
+            Log::info('The user ' . $user->email . ' has removed the skill ' . $skill->title . ' from their known skills list');
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'The user ' . $user->email . ' has removed the skill ' . $skill->title . ' from their known skills list'
+                ],
+                Response::HTTP_OK
+            );
+        } catch (\Exception $exception) {
+
+            Log::error('Error removing known skill: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error removing known skill'
                 ],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
