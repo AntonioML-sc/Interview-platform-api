@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Skill;
+use App\Models\SkillUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -104,7 +105,7 @@ class SkillController extends Controller
             $skill->description = $request->input('description');
 
             $skill->save();
-            
+
             // the creator of the skill is the first user and the admin of the skill
             $userId = auth()->user()->id;
             $skill->users()->attach($userId, ['creator' => true]);
@@ -126,6 +127,92 @@ class SkillController extends Controller
                 [
                     'success' => false,
                     'message' => 'Error adding new skill'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function updateSkill(Request $request, $skillId)
+    {
+        // update data of an existing skill
+        try {
+
+            Log::info('updating skill');
+
+            // validate data provided by request body
+            $validator = Validator::make($request->all(), [
+                'title' => 'string|max:255|unique:skills',
+                'description' => 'string|max:255'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => $validator->errors()
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            $skill = Skill::query()->find($skillId);
+
+            // check if the skill really exists in db
+            if (!$skill) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Invalid skill id'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // only the creator of the skill is allowed to edit it
+            $userId = auth()->user()->id;
+            $userIsCreator = SkillUser::query()
+                ->where('skill_id', $skillId)
+                ->where('user_id', $userId)
+                ->first()
+                ->creator;
+
+            if (!$userIsCreator) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'User not authorized'
+                    ],
+                    Response::HTTP_FORBIDDEN
+                );
+            }
+
+            // edit the skill fields with the values provided
+            $title = $request->input('title');
+            $description = $request->input('description');
+
+            if (isset($title)) $skill->title = $title;
+            if (isset($description)) $skill->description = $description;
+
+            $skill->save();
+
+            Log::info('Skill data updated: ' . $skill->id);
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Skill updated successfully',
+                    'data' => $skill
+                ]
+            );
+        } catch (\Exception $exception) {
+
+            Log::error('Error updating skill: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error updating skill'
                 ],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
