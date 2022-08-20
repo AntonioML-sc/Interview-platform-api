@@ -65,4 +65,5 @@ Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
     Route::post('/positions/new', [PositionController::class, 'newPosition']);
     Route::post('/positions/attach-skill', [PositionController::class, 'attachSkill']);
     Route::post('/positions/detach-skill', [PositionController::class, 'detachSkill']);
+    Route::put('/positions/update/{positionId}', [PositionController::class, 'updatePosition']);
 });

@@ -308,4 +308,112 @@ class PositionController extends Controller
             );
         }
     }
+
+    public function updatePosition(Request $request, $positionId)
+    {
+        // update register in positions table using info provided by request body. Recruiters only.
+        // it also works as a logical deletion by setting the field 'open' to 'false'.
+        try {
+
+            Log::info('updating position');
+
+            // validate data provided by request body
+            $validator = Validator::make($request->all(), [
+                'title' => 'string|max:255|unique:positions',
+                'description' => 'string|max:255',
+                'company_name' => 'string|max:255',
+                'open' => 'boolean'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => $validator->errors()
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            $position = Position::find($positionId);
+
+            // check if the position exists
+            if (!$position) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'The position specified is not in database'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if the logged user is the position admin
+            $userId = auth()->user()->id;
+            $positionAdminId = Application::query()
+                ->where('position_id', $positionId)
+                ->where('status', 'admin')
+                ->first()
+                ->user_id;
+
+            if ($userId != $positionAdminId) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'User not allowed to do this operation'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // edit the position with the values provided
+            $title = $request->input('title');
+            $description = $request->input('description');
+            $companyName = $request->input('company_name');
+            $open = $request->input('open');
+
+            if (isset($companyName)) {
+                // check if the new company exists
+                $company = Company::query()
+                    ->where('name', $request->input('company_name'))
+                    ->first();
+
+                if (!$company) {
+                    return response()->json(
+                        [
+                            'success' => false,
+                            'message' => 'The company specified is not in database'
+                        ],
+                        Response::HTTP_BAD_REQUEST
+                    );
+                }
+                $position->company_id = $company->id;
+            }
+
+            if (isset($title)) $position->title = $title;
+            if (isset($description)) $position->description = $description;
+            if (isset($open)) $position->open = $open;
+            $position->save();
+
+            Log::info('Position edited: ' . $position->id . ': ' . $position->title);
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Position edited: ' . $position->title
+                ]
+            );
+        } catch (\Exception $exception) {
+
+            Log::error('Error editing position: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error editing position'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }
