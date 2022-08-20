@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Application;
 use App\Models\Company;
 use App\Models\Position;
+use App\Models\Skill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -117,6 +118,100 @@ class PositionController extends Controller
                 [
                     'success' => false,
                     'message' => 'Error adding new position'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function attachSkill(Request $request)
+    {
+        // add a skill to the list of required skills of a position, stored in pivot table position_skill
+        try {
+
+            Log::info('Attaching a skill to the requirements of a position');
+
+            // validate data provided by request body
+            $validator = Validator::make($request->all(), [
+                'position_id' => 'required|string|max:36|min:36',
+                'skill_id' => 'required|string|max:36|min:36'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => $validator->errors()
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            $position = Position::find($request->input('position_id'));
+            $skill = Skill::find($request->input('skill_id'));
+
+            // check if the position exists
+            if (!$position) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'The position specified is not in database'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if the skill exists
+            if (!$skill) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'The skill specified is not in database'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if the logged user is the position admin
+            $userId = auth()->user()->id;
+            $positionAdminId = Application::query()
+                ->where('position_id', $position->id)
+                ->where('status', 'admin')
+                ->first()
+                ->user_id;
+
+            if ($userId != $positionAdminId) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'User not allowed to this operation'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // if everything is ok, attach the skill to the position
+            $positionHasSkill = $position->skills->contains($skill->id);
+            if (!$positionHasSkill) {
+                $position->skills()->attach($skill->id);
+            }
+
+            Log::info('Skill ' . $skill->title . ' added to requirements of position ' . $position->title);
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Skill ' . $skill->title . ' added to requirements of position ' . $position->title
+                ]
+            );
+        } catch (\Exception $exception) {
+
+            Log::error('Error attaching skill to position: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error attaching skill to position'
                 ],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
