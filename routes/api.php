@@ -60,3 +60,7 @@ Route::group(["middleware" => "jwt.auth"], function () {
 
 // position routes
 Route::get('/positions/get-all', [PositionController::class, 'getAll']);
+
+Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
+    Route::post('/positions/new', [PositionController::class, 'newPosition']);
+});
