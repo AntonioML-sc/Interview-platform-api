@@ -46,6 +46,54 @@ class PositionController extends Controller
         }
     }
 
+    public function getById($positionId)
+    {
+        // retrieve the position with id given if it is active and its required skills
+        try {
+
+            Log::info("retrieving position by id");
+
+            $position = Position::query()
+                ->where('open', true)
+                ->find($positionId);
+
+            // error message if the position does not exist
+            if (!$position) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'The position specified is not in database'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            $positionSkills = $position->skills()->get();
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Position retrieved successfully',
+                    'data' => [
+                        'position' => $position,
+                        'skills' => $positionSkills
+                    ]
+                ]
+            );
+        } catch (\Exception $exception) {
+
+            Log::error("Error retrieving position by id" . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error retrieving position by id'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
     public function newPosition(Request $request)
     {
         // creates a new register in positions table using info provided by request body. Recruiters only.
