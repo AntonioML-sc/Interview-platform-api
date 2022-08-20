@@ -94,6 +94,40 @@ class PositionController extends Controller
         }
     }
 
+    public function getByTitle($title)
+    {
+        // look for registers whose names include the string provided
+        try {
+
+            Log::info("Retrieving positions by title");
+
+            $positions = Position::query()
+                ->where('title', 'like', '%' . $title . '%')
+                ->orderBy('title', 'desc')
+                ->get()
+                ->toArray();
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Positions retrieved successfully',
+                    'data' => $positions
+                ]
+            );
+        } catch (\Exception $exception) {
+
+            Log::error("Error retrieving positions by title: " . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error retrieving positions by title'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
     public function newPosition(Request $request)
     {
         // creates a new register in positions table using info provided by request body. Recruiters only.
