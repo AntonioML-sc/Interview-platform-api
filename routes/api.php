@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\PositionController;
 use App\Http\Controllers\SkillController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -56,3 +57,6 @@ Route::group(["middleware" => "jwt.auth"], function () {
     Route::post('/skills/add-known-skill', [SkillController::class, 'addKnownSkill']);
     Route::post('/skills/remove-known-skill', [SkillController::class, 'removeKnownSkill']);
 });
+
+// position routes
+Route::get('/positions/get-all', [PositionController::class, 'getAll']);
