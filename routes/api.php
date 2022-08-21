@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\PositionController;
@@ -68,4 +69,9 @@ Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
     Route::post('/positions/attach-skill', [PositionController::class, 'attachSkill']);
     Route::post('/positions/detach-skill', [PositionController::class, 'detachSkill']);
     Route::put('/positions/update/{positionId}', [PositionController::class, 'updatePosition']);
+});
+
+// application routes
+Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
+    Route::get('/applications/get-by-position/{positionId}', [ApplicationController::class, 'getByPositionId']);    
 });
