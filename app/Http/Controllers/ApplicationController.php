@@ -61,4 +61,41 @@ class ApplicationController extends Controller
             );
         }
     }
+
+    public function getMyApplications()
+    {
+        // get applications of logged user.
+        try {
+
+            Log::info("Retrieving user's applications");
+
+            $userId = auth()->user()->id;
+
+            $applications = Application::query()
+                ->where('user_id', $userId)
+                ->orderBy('status', 'desc')
+                ->orderBy('updated_at', 'desc')
+                ->get()
+                ->toArray();
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => "User's Applications retrieved successfully",
+                    'data' => $applications
+                ]
+            );
+        } catch (\Exception $exception) {
+
+            Log::error("Error retrieving user's applications" . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => "Error retrieving user's applications"
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }
