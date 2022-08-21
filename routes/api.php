@@ -73,7 +73,8 @@ Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
 
 // application routes
 Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
-    Route::get('/applications/get-by-position/{positionId}', [ApplicationController::class, 'getByPositionId']);    
+    Route::get('/applications/get-by-position/{positionId}', [ApplicationController::class, 'getByPositionId']);
+    Route::put('/applications/reject-application/{applicationId}', [ApplicationController::class, 'rejectApplication']);
 });
 
 Route::group(["middleware" => "jwt.auth"], function () {

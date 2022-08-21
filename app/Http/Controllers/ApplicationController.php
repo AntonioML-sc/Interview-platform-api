@@ -184,4 +184,69 @@ class ApplicationController extends Controller
             );
         }
     }
+
+    public function rejectApplication($applicationId)
+    {
+        // Set an application as rejected
+        try {
+
+            Log::info('Rejecting applicant');
+
+            $application = Application::find($applicationId);
+
+            // check if the application exists
+            if (!$application) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'The application is not registered'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if the logged user is the position admin
+            $userId = auth()->user()->id;
+            $positionAdminId = Application::query()
+                ->where('position_id', $application->position_id)
+                ->where('status', 'admin')
+                ->first()
+                ->user_id;
+
+            if ($userId != $positionAdminId) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'User not allowed to this operation'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // reject the applicant
+            $application->status = 'rejected';
+            $application->save();
+
+            Log::info('Application ' . $applicationId . ' has been discarded by position admin');
+            
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'applicant rejected'
+                ]
+            );
+
+        } catch (\Exception $exception) {
+
+            Log::error("Error rejecting applicant" . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => "Error rejecting applicant"
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }
