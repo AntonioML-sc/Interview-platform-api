@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Application;
+use App\Models\Position;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -93,6 +94,91 @@ class ApplicationController extends Controller
                 [
                     'success' => false,
                     'message' => "Error retrieving user's applications"
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function applyForPosition(Request $request)
+    {
+        try {
+
+            Log::info('User applying for position');
+
+            // validate data provided by request body
+            $validator = Validator::make($request->all(), [
+                'position_id' => 'required|string|max:36|min:36'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => $validator->errors()
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            $user = auth()->user();
+            $positionId = $request->input('position_id');
+
+            // check if the position exists and it is still open
+            $position = Position::query()
+                ->where('open', true)
+                ->find($positionId);
+
+            if (!$position) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Position not available'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if user already applied for this position
+            $application = Application::query()
+                ->where('position_id', $positionId)
+                ->where('user_id', $user->id)
+                ->first();
+
+            if ($application) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'The register already exists'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // register the new application
+            $application = new Application();
+            $application->position_id = $positionId;
+            $application->user_id = $user->id;
+            $application->status = 'pending';
+            $application->save();
+
+            Log::info('User ' . $user->id . 'has applied for position ' . $positionId);
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'User ' . $user->email . ' has applied for position ' . $position->title
+                ],
+                Response::HTTP_CREATED
+            );
+        } catch (\Exception $exception) {
+
+            Log::error("Error applying for position" . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => "Error applying for position"
                 ],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
