@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('tests', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->date('date');
+            $table->timestamp('date');
             $table->boolean('completed');
             $table->timestamps();
         });
