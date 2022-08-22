@@ -77,17 +77,17 @@ class User extends Authenticatable implements JWTSubject
 
     public function skills()
     {
-        return $this->belongsToMany(Skill::class)->using(SkillUser::class);
+        return $this->belongsToMany(Skill::class)->using(SkillUser::class)->withTimestamps();
     }
 
     public function positions()
     {
-        return $this->belongsToMany(Position::class)->using(Application::class);
+        return $this->belongsToMany(Position::class)->using(Application::class)->withTimestamps();
     }
 
     public function tests()
     {
-        return $this->belongsToMany(Test::class)->using(TestUser::class);
+        return $this->belongsToMany(Test::class)->using(TestUser::class)->withTimestamps();
     }
 
     public function companies()

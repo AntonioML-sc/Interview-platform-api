@@ -22,11 +22,11 @@ class Position extends Model
 
     public function skills()
     {
-        return $this->belongsToMany(Skill::class)->using(PositionSkill::class);
+        return $this->belongsToMany(Skill::class)->using(PositionSkill::class)->withTimestamps();
     }
 
     public function users()
     {
-        return $this->belongsToMany(User::class)->using(Application::class);
+        return $this->belongsToMany(User::class)->using(Application::class)->withTimestamps();
     }
 }

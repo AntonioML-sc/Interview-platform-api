@@ -17,16 +17,16 @@ class Skill extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class)->using(SkillUser::class);
+        return $this->belongsToMany(User::class)->using(SkillUser::class)->withTimestamps();
     }
 
     public function positions()
     {
-        return $this->belongsToMany(Position::class)->using(PositionSkill::class);
+        return $this->belongsToMany(Position::class)->using(PositionSkill::class)->withTimestamps();
     }
 
     public function tests()
     {
-        return $this->belongsToMany(Test::class)->using(SkillMark::class);
+        return $this->belongsToMany(Test::class)->using(SkillMark::class)->withTimestamps();
     }
 }

@@ -17,11 +17,11 @@ class Test extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class)->using(TestUser::class);
+        return $this->belongsToMany(User::class)->using(TestUser::class)->withTimestamps();
     }
 
     public function skills()
     {
-        return $this->belongsToMany(Skill::class)->using(SkillMark::class);
+        return $this->belongsToMany(Skill::class)->using(SkillMark::class)->withTimestamps();
     }
 }
