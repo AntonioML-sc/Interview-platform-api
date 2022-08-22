@@ -25,8 +25,8 @@ class Position extends Model
         return $this->belongsToMany(Skill::class)->using(PositionSkill::class);
     }
 
-    public function applications()
+    public function users()
     {
-        return $this->hasMany(Application::class);
+        return $this->belongsToMany(User::class)->using(Application::class);
     }
 }
