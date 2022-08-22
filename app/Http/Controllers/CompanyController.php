@@ -103,15 +103,17 @@ class CompanyController extends Controller
                 );
             }
 
+            // the user that created each company register will be the only one allowed to edit it
+            $userId = auth()->user()->id;
+
             // create the new company with the values provided
             $company = new Company();
-
+            $company->user_id = $userId;
             $company->name = $request->input('name');
             $company->address = $request->input('address');
             $company->email = $request->input('email');
             $company->description = $request->input('description');
             $company->status = 'active';
-
             $company->save();
 
             Log::info('New company registered: ' . $company->name);
@@ -171,6 +173,20 @@ class CompanyController extends Controller
                     [
                         'success' => false,
                         'message' => 'Invalid company id'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check it logged user is the company admin
+            $userId = auth()->user()->id;
+            $companyAdminId = $company->user_id;
+
+            if ($userId != $companyAdminId) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'User not allowed to this operation'
                     ],
                     Response::HTTP_BAD_REQUEST
                 );
