@@ -20,8 +20,8 @@ class Test extends Model
         return $this->belongsToMany(User::class)->using(TestUser::class);
     }
 
-    public function skillMarks()
+    public function skills()
     {
-        return $this->hasMany(SkillMark::class);
+        return $this->belongsToMany(Skill::class)->using(SkillMark::class);
     }
 }

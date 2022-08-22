@@ -25,8 +25,8 @@ class Skill extends Model
         return $this->belongsToMany(Position::class)->using(PositionSkill::class);
     }
 
-    public function skillMarks()
+    public function tests()
     {
-        return $this->hasMany(SkillMark::class);
+        return $this->belongsToMany(Test::class)->using(SkillMark::class);
     }
 }

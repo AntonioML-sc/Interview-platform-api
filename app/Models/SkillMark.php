@@ -12,16 +12,4 @@ class SkillMark extends Model
     use HasFactory, Uuids;
 
     protected $primaryKey = 'id';
-
-    // relationships
-
-    public function test()
-    {
-        return $this->belongsTo(Test::class);
-    }
-
-    public function skill()
-    {
-        return $this->belongsTo(Skill::class);
-    }
 }
