@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\SkillController;
+use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -80,4 +81,9 @@ Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
 Route::group(["middleware" => "jwt.auth"], function () {
     Route::get('/applications/my-applications', [ApplicationController::class, 'getMyApplications']);
     Route::post('/applications/apply', [ApplicationController::class, 'applyForPosition']);
+});
+
+// tests controller
+Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
+    Route::post('/tests/new', [TestController::class, 'newTest']);
 });
