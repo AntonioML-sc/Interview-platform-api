@@ -18,6 +18,7 @@ class CompanySeeder extends Seeder
         DB::table('companies')->insert(
             [
                 'id' => 'eedc1657-148f-42ba-8e0a-f1c20c6f4454',
+                'user_id' => '11323c85-5633-4d1a-bc40-de19c7c77a23',
                 'name' => 'GeeksHubs',
                 'address' => 'Coworking Wayco Ruzafa',
                 'email' => 'geekshubs@gmail.com',
