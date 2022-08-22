@@ -86,4 +86,5 @@ Route::group(["middleware" => "jwt.auth"], function () {
 // tests controller
 Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
     Route::post('/tests/new', [TestController::class, 'newTest']);
+    Route::post('/tests/attach-skill', [TestController::class, 'attachSkill']);
 });
