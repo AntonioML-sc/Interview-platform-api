@@ -82,7 +82,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function positions()
     {
-        return $this->belongsToMany(Position::class)->using(Application::class)->withTimestamps();
+        return $this->belongsToMany(Position::class, 'applications', 'user_id', 'position_id')->using(Application::class)->withTimestamps();
     }
 
     public function tests()
