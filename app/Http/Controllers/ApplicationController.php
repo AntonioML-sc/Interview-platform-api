@@ -15,7 +15,6 @@ class ApplicationController extends Controller
     {
         // get applications by position id. Only available for the position admin.
         try {
-
             Log::info('Retrieving applications by position id');
 
             // check if the logged user is the position admin
@@ -50,7 +49,6 @@ class ApplicationController extends Controller
                 ]
             );
         } catch (\Exception $exception) {
-
             Log::error("Error retrieving applications by position id" . $exception->getMessage());
 
             return response()->json(
@@ -67,7 +65,6 @@ class ApplicationController extends Controller
     {
         // get applications of logged user.
         try {
-
             Log::info("Retrieving user's applications");
 
             $userId = auth()->user()->id;
@@ -87,7 +84,6 @@ class ApplicationController extends Controller
                 ]
             );
         } catch (\Exception $exception) {
-
             Log::error("Error retrieving user's applications" . $exception->getMessage());
 
             return response()->json(
@@ -103,7 +99,6 @@ class ApplicationController extends Controller
     public function applyForPosition(Request $request)
     {
         try {
-
             Log::info('User applying for position');
 
             // validate data provided by request body
@@ -139,13 +134,10 @@ class ApplicationController extends Controller
                 );
             }
 
-            // check if user already applied for this position
-            $application = Application::query()
-                ->where('position_id', $positionId)
-                ->where('user_id', $user->id)
-                ->first();
+            // check if user already applied for (or is admin of) this position
+            $userApplied = $position->users->contains($user->id);
 
-            if ($application) {
+            if ($userApplied) {
                 return response()->json(
                     [
                         'success' => false,
@@ -156,11 +148,7 @@ class ApplicationController extends Controller
             }
 
             // register the new application
-            $application = new Application();
-            $application->position_id = $positionId;
-            $application->user_id = $user->id;
-            $application->status = 'pending';
-            $application->save();
+            $position->users()->attach($user->id, ['status' => 'pending']);
 
             Log::info('User ' . $user->id . 'has applied for position ' . $positionId);
 
@@ -189,7 +177,6 @@ class ApplicationController extends Controller
     {
         // Set an application as rejected
         try {
-
             Log::info('Rejecting applicant');
 
             $application = Application::find($applicationId);
@@ -205,7 +192,7 @@ class ApplicationController extends Controller
                 );
             }
 
-            // check if the logged user is the position admin
+            // check if the logged user is the position admin or if the admin tries to reject itself by mistake
             $userId = auth()->user()->id;
             $positionAdminId = Application::query()
                 ->where('position_id', $application->position_id)
@@ -213,7 +200,7 @@ class ApplicationController extends Controller
                 ->first()
                 ->user_id;
 
-            if ($userId != $positionAdminId) {
+            if ($userId != $positionAdminId || $positionAdminId == $application->user_id) {
                 return response()->json(
                     [
                         'success' => false,
@@ -228,16 +215,14 @@ class ApplicationController extends Controller
             $application->save();
 
             Log::info('Application ' . $applicationId . ' has been discarded by position admin');
-            
+
             return response()->json(
                 [
                     'success' => true,
                     'message' => 'applicant rejected'
                 ]
             );
-
         } catch (\Exception $exception) {
-
             Log::error("Error rejecting applicant" . $exception->getMessage());
 
             return response()->json(
