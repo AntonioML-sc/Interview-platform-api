@@ -17,7 +17,6 @@ class PositionController extends Controller
     {
         // retrieve all of the active (not deleted) positions
         try {
-
             Log::info("retrieving all positions");
 
             $positions = Position::query()
@@ -33,7 +32,6 @@ class PositionController extends Controller
                 ]
             );
         } catch (\Exception $exception) {
-
             Log::error("Error retrieving all positions" . $exception->getMessage());
 
             return response()->json(
@@ -50,7 +48,6 @@ class PositionController extends Controller
     {
         // retrieve the position with id given if it is active and its required skills
         try {
-
             Log::info("retrieving position by id");
 
             $position = Position::query()
@@ -81,7 +78,6 @@ class PositionController extends Controller
                 ]
             );
         } catch (\Exception $exception) {
-
             Log::error("Error retrieving position by id" . $exception->getMessage());
 
             return response()->json(
@@ -98,7 +94,6 @@ class PositionController extends Controller
     {
         // look for registers whose names include the string provided
         try {
-
             Log::info("Retrieving positions by title");
 
             $positions = Position::query()
@@ -116,7 +111,6 @@ class PositionController extends Controller
                 ]
             );
         } catch (\Exception $exception) {
-
             Log::error("Error retrieving positions by title: " . $exception->getMessage());
 
             return response()->json(
@@ -133,7 +127,6 @@ class PositionController extends Controller
     {
         // creates a new register in positions table using info provided by request body. Recruiters only.
         try {
-
             Log::info('registering a new position');
 
             // validate data provided by request body
@@ -153,7 +146,8 @@ class PositionController extends Controller
                 );
             }
 
-            // check if the company exists
+            // check if the company exists and if logged user is the company admin
+            $user = auth()->user();
             $company = Company::query()
                 ->where('name', $request->input('company_name'))
                 ->first();
@@ -163,6 +157,15 @@ class PositionController extends Controller
                     [
                         'success' => false,
                         'message' => 'The company specified is not in database'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+            if ($user->id != $company->user_id) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'User not allowed to this operation'
                     ],
                     Response::HTTP_BAD_REQUEST
                 );
@@ -177,12 +180,7 @@ class PositionController extends Controller
             $position->save();
 
             // register the position's creator as the admin by adding a register in applications
-            $user = auth()->user();
-            $application = new Application();
-            $application->position_id = $position->id;
-            $application->user_id = $user->id;
-            $application->status = 'admin';
-            $application->save();
+            $position->users()->attach($user->id, ['status' => 'admin']);
 
             Log::info('New position registered: ' . $position->title . ' in company ' . $company->name . ' by user ' . $user->email);
 
@@ -194,7 +192,6 @@ class PositionController extends Controller
                 Response::HTTP_CREATED
             );
         } catch (\Exception $exception) {
-
             Log::error('Error adding new position: ' . $exception->getMessage());
 
             return response()->json(
@@ -211,7 +208,6 @@ class PositionController extends Controller
     {
         // add a skill to the list of required skills of a position, stored in pivot table position_skill
         try {
-
             Log::info('Attaching a skill to the requirements of a position');
 
             // validate data provided by request body
@@ -288,7 +284,6 @@ class PositionController extends Controller
                 ]
             );
         } catch (\Exception $exception) {
-
             Log::error('Error attaching skill to position: ' . $exception->getMessage());
 
             return response()->json(
@@ -305,7 +300,6 @@ class PositionController extends Controller
     {
         // remove a skill from the list of required skills of a position, stored in pivot table position_skill
         try {
-
             Log::info('Detaching a skill from the requirements of a position');
 
             // validate data provided by request body
@@ -379,7 +373,6 @@ class PositionController extends Controller
                 ]
             );
         } catch (\Exception $exception) {
-
             Log::error('Error detaching skill from position: ' . $exception->getMessage());
 
             return response()->json(
@@ -397,7 +390,6 @@ class PositionController extends Controller
         // update register in positions table using info provided by request body. Recruiters only.
         // it also works as a logical deletion by setting the field 'open' to 'false'.
         try {
-
             Log::info('updating position');
 
             // validate data provided by request body
@@ -456,7 +448,7 @@ class PositionController extends Controller
             $open = $request->input('open');
 
             if (isset($companyName)) {
-                // check if the new company exists
+                // check if the new company exists and if logged user is the company admin
                 $company = Company::query()
                     ->where('name', $request->input('company_name'))
                     ->first();
@@ -466,6 +458,15 @@ class PositionController extends Controller
                         [
                             'success' => false,
                             'message' => 'The company specified is not in database'
+                        ],
+                        Response::HTTP_BAD_REQUEST
+                    );
+                }
+                if ($userId != $company->user_id) {
+                    return response()->json(
+                        [
+                            'success' => false,
+                            'message' => 'User not allowed to this operation'
                         ],
                         Response::HTTP_BAD_REQUEST
                     );
@@ -487,7 +488,6 @@ class PositionController extends Controller
                 ]
             );
         } catch (\Exception $exception) {
-
             Log::error('Error editing position: ' . $exception->getMessage());
 
             return response()->json(
