@@ -14,7 +14,11 @@ return new class extends Migration
     public function up()
     {
         Schema::create('companies', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->uuid('id')->primary();$table->uuid('user_id')->nullable(false);
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
             $table->string('name')->unique();
             $table->string('email')->unique();
             $table->string('address');
