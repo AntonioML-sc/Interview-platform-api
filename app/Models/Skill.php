@@ -27,6 +27,6 @@ class Skill extends Model
 
     public function tests()
     {
-        return $this->belongsToMany(Test::class)->using(SkillMark::class)->withTimestamps();
+        return $this->belongsToMany(Test::class, 'skill_marks', 'skill_id', 'test_id')->using(SkillMark::class)->withTimestamps();
     }
 }
