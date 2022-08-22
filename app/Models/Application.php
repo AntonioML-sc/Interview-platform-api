@@ -11,5 +11,6 @@ class Application extends Pivot
 {
     use HasFactory, Uuids;
 
+    protected $table = 'applications';
     protected $primaryKey = 'id';
 }

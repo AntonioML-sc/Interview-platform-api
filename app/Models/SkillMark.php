@@ -11,5 +11,6 @@ class SkillMark extends Pivot
 {
     use HasFactory, Uuids;
 
+    protected $table = 'skill_marks';
     protected $primaryKey = 'id';
 }
