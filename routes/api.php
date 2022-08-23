@@ -6,6 +6,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
@@ -96,4 +97,9 @@ Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
 
 Route::group(["middleware" => "jwt.auth"], function () {
     Route::get('/tests/my-tests', [TestController::class, 'getMyTests']);
+});
+
+// user controller
+Route::group(["middleware" => "jwt.auth"], function () {
+    Route::get('/users/get-all', [UserController::class, 'getAll']);
 });
