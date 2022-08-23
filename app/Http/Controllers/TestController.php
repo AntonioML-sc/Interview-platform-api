@@ -448,4 +448,63 @@ class TestController extends Controller
             );
         }
     }
+
+    public function deleteTest($testId)
+    {
+        try {
+            Log::info('Deleting test');
+
+            $test = Test::find($testId);
+            $userId = auth()->user()->id;
+
+            // check if the test exists
+            if (!$test) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'The test specified does not exist'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if the logged user is the test examiner
+            $examinerId = TestUser::query()
+                ->where('test_id', $testId)
+                ->where('user_type', 'examiner')
+                ->first()
+                ->user_id;
+
+            if ($userId != $examinerId) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'User not allowed to this operation'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // if everything is ok, delete the test
+            Log::info('Test ' . $testId . ' about to be deleted');
+            $test->delete();
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Test deleted'
+                ]
+            );
+        } catch (\Exception $exception) {
+            Log::error('Error deleting test: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error deleting test'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }
