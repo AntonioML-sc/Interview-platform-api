@@ -8,6 +8,7 @@ use App\Http\Controllers\SkillController;
 use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,6 +89,7 @@ Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
     Route::post('/tests/new', [TestController::class, 'newTest']);
     Route::post('/tests/attach-skill', [TestController::class, 'attachSkill']);
     Route::post('/tests/detach-skill', [TestController::class, 'detachSkill']);
+    Route::put('/tests/evaluate-skill/{skillMarkId}', [TestController::class, 'evaluateSkill']);
 });
 
 Route::group(["middleware" => "jwt.auth"], function () {

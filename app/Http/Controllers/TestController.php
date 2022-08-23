@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Skill;
+use App\Models\SkillMark;
 use App\Models\Test;
 use App\Models\TestUser;
 use App\Models\User;
@@ -291,6 +292,77 @@ class TestController extends Controller
                 [
                     'success' => false,
                     'message' => 'Error removing skill from test'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function evaluateSkill(Request $request, $skillMarkId)
+    {
+        // update field mark in skill_marks table. This settles one examinee skill mark in a specific test.
+        try {
+            Log::info('evaluating skill: updating mark in skill marks');
+
+            // Validates mark
+            $validator = Validator::make($request->all(), [
+                'mark' => 'required|Integer|in:0,1,2,3,4,5,6,7,8,9,10'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors()->toJson(), Response::HTTP_BAD_REQUEST);
+            }
+            
+            $skillMarkRegister = SkillMark::find($skillMarkId);            
+            $userId = auth()->user()->id;
+
+            // check if the register exists in skill_marks table            
+            if (!$skillMarkRegister) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Register not found'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if the logged user is the test examiner
+            $examinerId = TestUser::query()
+                ->where('test_id', $skillMarkRegister->test_id)
+                ->where('user_type', 'examiner')
+                ->first()
+                ->user_id;
+
+            if ($userId != $examinerId) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'User not allowed to this operation'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // if everything is ok, update the mark
+            $skillMarkRegister->mark = $request->input('mark');
+            $skillMarkRegister->save();
+
+            Log::info('Skill mark ' . $skillMarkRegister->id .' edited');
+            
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Skill mark registered'
+                ]
+            );
+        } catch (\Exception $exception) {
+            Log::error('Error evaluating skill: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error evaluating skill'
                 ],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
