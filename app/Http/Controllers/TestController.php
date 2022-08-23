@@ -13,6 +13,44 @@ use Symfony\Component\HttpFoundation\Response;
 
 class TestController extends Controller
 {
+    public function getMyTests()
+    {
+        // get applications of logged user.
+        try {
+            Log::info("Retrieving user's tests");
+
+            $userId = auth()->user()->id;
+
+            $tests = Test::query()
+                ->with('skills:id,title')
+                ->with('users:id,last_name,first_name,email,title')
+                ->join('test_user', 'tests.id', '=', 'test_user.test_id')
+                ->select('tests.id as id', 'tests.date as date', 'tests.completed as completed', 'test_user.user_type as type')
+                ->where('test_user.user_id', $userId)
+                ->orderBy('tests.updated_at', 'desc')
+                ->get()
+                ->toArray();
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => "User's tests retrieved successfully",
+                    'data' => $tests
+                ]
+            );
+        } catch (\Exception $exception) {
+            Log::error("Error retrieving user's tests" . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => "Error retrieving user's tests"
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
     public function newTest(Request $request)
     {
         // A recruiter posts a new test for a specific examinee. Skills and marks are added later.
@@ -234,7 +272,7 @@ class TestController extends Controller
                 );
             }
 
-            // If everything is ok, detach the skill            
+            // If everything is ok, detach the skill
             $test->skills()->detach($skillId);
 
             Log::info('The skill ' . $skill->title . ' has been removed from test');
