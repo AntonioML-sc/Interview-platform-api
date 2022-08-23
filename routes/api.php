@@ -90,6 +90,7 @@ Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
     Route::post('/tests/attach-skill', [TestController::class, 'attachSkill']);
     Route::post('/tests/detach-skill', [TestController::class, 'detachSkill']);
     Route::put('/tests/evaluate-skill/{skillMarkId}', [TestController::class, 'evaluateSkill']);
+    Route::put('/tests/update/{testId}', [TestController::class, 'updateTest']);
 });
 
 Route::group(["middleware" => "jwt.auth"], function () {
