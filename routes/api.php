@@ -102,4 +102,5 @@ Route::group(["middleware" => "jwt.auth"], function () {
 // user controller
 Route::group(["middleware" => "jwt.auth"], function () {
     Route::get('/users/get-all', [UserController::class, 'getAll']);
+    Route::get('/users/get-by-skill/{word}', [UserController::class, 'getbySkillTitle']);
 });
