@@ -135,7 +135,13 @@ class AuthController extends Controller
     {
         $user = auth()->user();
         Log::info('User ' . $user->email . 'has consulted their personal profile');
-        return response()->json($user);
+        return response()->json(
+            [
+                'success' => true,
+                'message' => 'User profile retrieved',
+                'data' => $user
+            ]
+        );
     }
 
     public function logout()
@@ -285,7 +291,7 @@ class AuthController extends Controller
             $user->status = 'deleted';
 
             $user->save();
-            
+
             JWTAuth::invalidate(auth());
 
             return response()->json(
