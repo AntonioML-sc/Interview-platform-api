@@ -133,6 +133,9 @@ class PositionController extends Controller
             $validator = Validator::make($request->all(), [
                 'title' => 'required|string|max:255|unique:positions',
                 'description' => 'required|string|max:255',
+                'location' => 'required|string|max:255',
+                'mode' => 'required|string|max:255',
+                'salary' => 'required|string|max:255',
                 'company_name' => 'required|string|max:255'
             ]);
 
@@ -175,6 +178,9 @@ class PositionController extends Controller
             $position = new Position();
             $position->title = $request->input('title');
             $position->description = $request->input('description');
+            $position->location = $request->input('location');
+            $position->mode = $request->input('mode');
+            $position->salary = $request->input('salary');
             $position->company_id = $company->id;
             $position->open = true;
             $position->save();
@@ -397,6 +403,9 @@ class PositionController extends Controller
                 'title' => 'string|max:255|unique:positions',
                 'description' => 'string|max:255',
                 'company_name' => 'string|max:255',
+                'location' => 'required|string|max:255',
+                'mode' => 'required|string|max:255',
+                'salary' => 'required|string|max:255',
                 'open' => 'boolean'
             ]);
 
@@ -445,6 +454,9 @@ class PositionController extends Controller
             $title = $request->input('title');
             $description = $request->input('description');
             $companyName = $request->input('company_name');
+            $location = $request->input('location');
+            $mode = $request->input('mode');
+            $salary = $request->input('salary');
             $open = $request->input('open');
 
             if (isset($companyName)) {
@@ -475,6 +487,9 @@ class PositionController extends Controller
             }
 
             if (isset($title)) $position->title = $title;
+            if (isset($location)) $position->location = $location;
+            if (isset($mode)) $position->mode = $mode;
+            if (isset($salary)) $position->salary = $salary;
             if (isset($description)) $position->description = $description;
             if (isset($open)) $position->open = $open;
             $position->save();
