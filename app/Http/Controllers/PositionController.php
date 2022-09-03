@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Position;
 use App\Models\Skill;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,6 +21,9 @@ class PositionController extends Controller
             Log::info("retrieving all positions");
 
             $positions = Position::query()
+                ->with('skills:id,title,description')
+                ->with('company:id,name,address,email,description')
+                ->with('users:id,email,role_id')
                 ->where('open', true)
                 ->get()
                 ->toArray();
@@ -51,6 +55,9 @@ class PositionController extends Controller
             Log::info("retrieving position by id");
 
             $position = Position::query()
+                ->with('skills:id,title,description')
+                ->with('company:id,name,address,email,description')
+                ->with('users:id,email,role_id')
                 ->where('open', true)
                 ->find($positionId);
 
@@ -65,16 +72,11 @@ class PositionController extends Controller
                 );
             }
 
-            $positionSkills = $position->skills()->get();
-
             return response()->json(
                 [
                     'success' => true,
                     'message' => 'Position retrieved successfully',
-                    'data' => [
-                        'position' => $position,
-                        'skills' => $positionSkills
-                    ]
+                    'data' => $position                    
                 ]
             );
         } catch (\Exception $exception) {
@@ -97,6 +99,9 @@ class PositionController extends Controller
             Log::info("Retrieving positions by title");
 
             $positions = Position::query()
+                ->with('skills:id,title,description')
+                ->with('company:id,name,address,email,description')
+                ->with('users:id,email,role_id')
                 ->where('title', 'like', '%' . $word . '%')
                 ->orWhere('description', 'like', '%' . $word . '%')
                 ->orderBy('title', 'desc')
