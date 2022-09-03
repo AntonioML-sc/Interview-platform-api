@@ -78,6 +78,42 @@ class CompanyController extends Controller
         }
     }
 
+    public function getUserCompanies()
+    {
+        // retrieve all of the companies whose admin (recruiter) is logged in
+        try {
+
+            Log::info("User retrieving their companies");
+            $userId = auth()->user()->id;
+
+            $companies = Company::query()
+                ->where('user_id', $userId)
+                ->whereNot('status', 'deleted')
+                ->orderBy('name', 'desc')
+                ->get()
+                ->toArray();
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'User companies retrieved successfully',
+                    'data' => $companies
+                ]
+            );
+        } catch (\Exception $exception) {
+
+            Log::error("Error retrieving user companies" . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error retrieving user companies'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
     public function newCompany(Request $request)
     {
         // creates a new register in companies using info provided by request body. Recruiters only.
