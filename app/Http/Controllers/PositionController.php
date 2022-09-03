@@ -101,6 +101,7 @@ class PositionController extends Controller
             $positions = Position::query()
                 ->join('position_skill', 'positions.id', '=', 'position_skill.position_id')
                 ->join('skills', 'skills.id', '=', 'position_skill.skill_id')
+                ->join('companies', 'positions.company_id', '=', 'companies.id')
                 ->select('positions.id as id', 'positions.title as title', 'positions.company_id as company_id', 'positions.location as location', 'positions.mode as mode', 'positions.salary as salary', 'positions.description as description', 'positions.created_at as release_date')
                 ->with('skills:id,title,description')
                 ->with('company:id,name,address,email,description')
@@ -111,6 +112,7 @@ class PositionController extends Controller
                         ->where('positions.title', 'like', '%' . $word . '%')
                         ->orWhere('positions.description', 'like', '%' . $word . '%')
                         ->orWhere('positions.location', 'like', '%' . $word . '%')
+                        ->orWhere('companies.name', 'like', '%' . $word . '%')
                         ->orWhere('skills.title', 'like', '%' . $word . '%');
                 })
                 ->groupBy('positions.id')
