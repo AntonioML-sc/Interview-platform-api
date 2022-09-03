@@ -76,7 +76,7 @@ class PositionController extends Controller
                 [
                     'success' => true,
                     'message' => 'Position retrieved successfully',
-                    'data' => $position                    
+                    'data' => $position
                 ]
             );
         } catch (\Exception $exception) {
@@ -99,12 +99,22 @@ class PositionController extends Controller
             Log::info("Retrieving positions by title");
 
             $positions = Position::query()
+                ->join('position_skill', 'positions.id', '=', 'position_skill.position_id')
+                ->join('skills', 'skills.id', '=', 'position_skill.skill_id')
+                ->select('positions.id as id', 'positions.title as title', 'positions.company_id as company_id', 'positions.location as location', 'positions.mode as mode', 'positions.salary as salary', 'positions.description as description', 'positions.created_at as release_date')
                 ->with('skills:id,title,description')
                 ->with('company:id,name,address,email,description')
                 ->with('users:id,email,role_id')
-                ->where('title', 'like', '%' . $word . '%')
-                ->orWhere('description', 'like', '%' . $word . '%')
-                ->orderBy('title', 'desc')
+                ->where('open', true)
+                ->where(function ($query) use ($word) {
+                    $query
+                        ->where('positions.title', 'like', '%' . $word . '%')
+                        ->orWhere('positions.description', 'like', '%' . $word . '%')
+                        ->orWhere('positions.location', 'like', '%' . $word . '%')
+                        ->orWhere('skills.title', 'like', '%' . $word . '%');
+                })
+                ->groupBy('positions.id')
+                ->orderBy('positions.created_at', 'desc')
                 ->get()
                 ->toArray();
 
