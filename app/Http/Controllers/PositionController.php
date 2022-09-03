@@ -138,6 +138,41 @@ class PositionController extends Controller
         }
     }
 
+    public function getByCompanyId($companyId)
+    {
+        // retrieve the position with company id given and its required skills if it is active
+        try {
+            Log::info("retrieving positions by company id");
+
+            $position = Position::query()
+                ->with('skills:id,title,description')
+                ->with('company:id,name,address,email,description')
+                ->with('users:id,email,role_id')
+                ->where('open', true)
+                ->where('company_id', $companyId)
+                ->get()
+                ->toArray();
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Position retrieved successfully',
+                    'data' => $position
+                ]
+            );
+        } catch (\Exception $exception) {
+            Log::error("Error retrieving position by id" . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error retrieving position by id'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
     public function newPosition(Request $request)
     {
         // creates a new register in positions table using info provided by request body. Recruiters only.

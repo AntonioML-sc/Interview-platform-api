@@ -66,6 +66,7 @@ Route::group(["middleware" => "jwt.auth"], function () {
 Route::get('/positions/get-all', [PositionController::class, 'getAll']);
 Route::get('/positions/get-by-id/{positionId}', [PositionController::class, 'getById']);
 Route::get('/positions/get-by-keyword/{word}', [PositionController::class, 'getByKeyWords']);
+Route::get('/positions/get-by-company/{companyId}', [PositionController::class, 'getByCompanyId']);
 
 Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
     Route::post('/positions/new', [PositionController::class, 'newPosition']);
