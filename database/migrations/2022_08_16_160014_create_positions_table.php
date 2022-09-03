@@ -21,6 +21,8 @@ return new class extends Migration
                 ->on('companies')
                 ->onDelete('cascade');
             $table->string('title');
+            $table->string('location');
+            $table->string('mode');
             $table->text('description');
             $table->boolean('open');
             $table->timestamps();
