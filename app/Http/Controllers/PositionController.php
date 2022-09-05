@@ -115,7 +115,7 @@ class PositionController extends Controller
                         ->orWhere('companies.name', 'like', '%' . $word . '%')
                         ->orWhere('skills.title', 'like', '%' . $word . '%');
                 })
-                ->groupBy('positions.id')
+                ->groupBy('positions.id', 'positions.title', 'positions.company_id', 'positions.location', 'positions.mode', 'positions.salary', 'positions.description', 'positions.created_at')
                 ->orderBy('positions.created_at', 'desc')
                 ->get()
                 ->toArray();
