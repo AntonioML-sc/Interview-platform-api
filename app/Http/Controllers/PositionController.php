@@ -245,7 +245,8 @@ class PositionController extends Controller
             return response()->json(
                 [
                     'success' => true,
-                    'message' => 'New position added'
+                    'message' => 'New position registered',
+                    'data' => $position
                 ],
                 Response::HTTP_CREATED
             );
