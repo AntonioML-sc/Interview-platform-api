@@ -445,7 +445,7 @@ class PositionController extends Controller
 
     public function attachSkillArray(Request $request)
     {
-        // add a list of skill (provided in a skills array in $request) to the list of required skills
+        // add a list of skills (provided in a skills array in $request) to the list of required skills
         // of a position, stored in pivot table position_skill
         try {
             Log::info('Attaching a list of skills to the requirements of a position');
@@ -477,7 +477,7 @@ class PositionController extends Controller
                     Response::HTTP_BAD_REQUEST
                 );
             }
-                        
+
             // check if the logged user is the position admin
             $userId = auth()->user()->id;
             $positionAdminId = Application::query()
@@ -495,7 +495,7 @@ class PositionController extends Controller
                     Response::HTTP_BAD_REQUEST
                 );
             }
-            
+
             // check if all of the skills exist
             $skillArray = $request->input('skills');
             for ($i = 0; $i < count($skillArray); $i++) {
@@ -510,7 +510,7 @@ class PositionController extends Controller
                     );
                 }
             }
-                        
+
             // if everything is ok, attach all of the skills to the position
             for ($i = 0; $i < count($skillArray); $i++) {
                 $skill = Skill::find($skillArray[$i]['id']);
@@ -533,8 +533,101 @@ class PositionController extends Controller
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error attaching skills to position',
-                    'errors' => $exception->getMessage()
+                    'message' => 'Error attaching skills to position'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function detachSkillArray(Request $request)
+    {
+        // remove a list of skills (provided in a skills array in $request) from the list of required skills
+        // of a position, stored in pivot table position_skill
+        try {
+            Log::info('Detaching a list of skills to the requirements of a position');
+
+            // validate data provided by request body
+            $validator = Validator::make($request->all(), [
+                'position_id' => 'required|string|max:36|min:36',
+                'skills.*.id' => 'required|string|max:36|min:36'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => $validator->errors()
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if the position exists
+            $position = Position::find($request->input('position_id'));
+            if (!$position) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'The position specified is not in database'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if the logged user is the position admin
+            $userId = auth()->user()->id;
+            $positionAdminId = Application::query()
+                ->where('position_id', $position->id)
+                ->where('status', 'admin')
+                ->first()
+                ->user_id;
+
+            if ($userId != $positionAdminId) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'User not allowed to this operation'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if all of the skills exist
+            $skillArray = $request->input('skills');
+            for ($i = 0; $i < count($skillArray); $i++) {
+                $skill = Skill::find($skillArray[$i]['id']);
+                if (!$skill) {
+                    return response()->json(
+                        [
+                            'success' => false,
+                            'message' => 'The skill specified is not in database'
+                        ],
+                        Response::HTTP_BAD_REQUEST
+                    );
+                }
+            }
+
+            // if everything is ok, detach all of the skills from the position_skill pivot table
+            for ($i = 0; $i < count($skillArray); $i++) {
+                $skill = Skill::find($skillArray[$i]['id']);
+                $position->skills()->detach($skill->id);
+            }
+            Log::info('Skill list removed from requirements of position ' . $position->title);
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Skill list removed from requirements of position ' . $position->title
+                ]
+            );
+        } catch (\Exception $exception) {
+            Log::error('Error detaching skills to position: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error detaching skills to position'
                 ],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
