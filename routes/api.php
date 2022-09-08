@@ -72,7 +72,9 @@ Route::get('/positions/get-by-company/{companyId}', [PositionController::class, 
 Route::group(["middleware" => ["jwt.auth", "isRecruiter"]], function () {
     Route::post('/positions/new', [PositionController::class, 'newPosition']);
     Route::post('/positions/attach-skill', [PositionController::class, 'attachSkill']);
+    Route::post('/positions/attach-skill-list', [PositionController::class, 'attachSkillArray']);
     Route::post('/positions/detach-skill', [PositionController::class, 'detachSkill']);
+    Route::post('/positions/detach-skill-list', [PositionController::class, 'detachSkillArray']);
     Route::put('/positions/update/{positionId}', [PositionController::class, 'updatePosition']);
 });
 
