@@ -19,7 +19,7 @@ class SkillController extends Controller
 
             Log::info("retrieving skills");
 
-            $skills = Skill::all()->toArray();
+            $skills = Skill::query()->orderBy('title')->get()->toArray();
 
             return response()->json(
                 [
