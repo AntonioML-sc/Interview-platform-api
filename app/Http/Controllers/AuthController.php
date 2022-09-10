@@ -133,8 +133,15 @@ class AuthController extends Controller
 
     public function myProfile()
     {
-        $user = auth()->user();
-        Log::info('User ' . $user->email . 'has consulted their personal profile');
+        $userId =  auth()->user()->id;
+        $user = User::query()
+            ->with('skills')
+            ->with('tests')
+            ->with('positions')
+            ->with('companies')
+            ->find($userId);
+
+        Log::info('User ' . $user->email . ' has consulted their personal profile');
         return response()->json(
             [
                 'success' => true,
