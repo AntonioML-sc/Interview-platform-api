@@ -17,7 +17,10 @@ class Skill extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class)->using(SkillUser::class)->withTimestamps();
+        return $this->belongsToMany(User::class)
+            ->using(SkillUser::class)
+            ->withPivot('creator')
+            ->withTimestamps();
     }
 
     public function positions()
@@ -27,6 +30,10 @@ class Skill extends Model
 
     public function tests()
     {
-        return $this->belongsToMany(Test::class, 'skill_marks', 'skill_id', 'test_id')->using(SkillMark::class)->withPivot('id', 'mark')->as('marks')->withTimestamps();
+        return $this->belongsToMany(Test::class, 'skill_marks', 'skill_id', 'test_id')
+            ->using(SkillMark::class)
+            ->withPivot('id', 'mark')
+            ->as('marks')
+            ->withTimestamps();
     }
 }

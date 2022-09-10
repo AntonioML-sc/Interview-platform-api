@@ -27,6 +27,10 @@ class Position extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'applications', 'position_id', 'user_id')->using(Application::class)->withTimestamps();
+        return $this->belongsToMany(User::class, 'applications', 'position_id', 'user_id')
+            ->using(Application::class)
+            ->withPivot('status')
+            ->as('application')
+            ->withTimestamps();
     }
 }

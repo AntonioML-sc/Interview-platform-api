@@ -17,11 +17,18 @@ class Test extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class)->using(TestUser::class)->withTimestamps();
+        return $this->belongsToMany(User::class)
+            ->using(TestUser::class)
+            ->withPivot('user_type')
+            ->withTimestamps();
     }
 
     public function skills()
     {
-        return $this->belongsToMany(Skill::class, 'skill_marks', 'test_id', 'skill_id')->using(SkillMark::class)->withPivot('id', 'mark')->as('marks')->withTimestamps();
+        return $this->belongsToMany(Skill::class, 'skill_marks', 'test_id', 'skill_id')
+            ->using(SkillMark::class)
+            ->withPivot('id', 'mark')
+            ->as('marks')
+            ->withTimestamps();
     }
 }
