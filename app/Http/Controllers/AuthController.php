@@ -136,8 +136,8 @@ class AuthController extends Controller
         $userId =  auth()->user()->id;
         $user = User::query()
             ->with('skills')
-            ->with('tests')
-            ->with('positions')
+            ->with('tests.skills')
+            ->with('positions.company')
             ->with('companies')
             ->find($userId);
 
