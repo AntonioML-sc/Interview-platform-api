@@ -61,7 +61,8 @@ class TestController extends Controller
             // validate data provided by request body
             $validator = Validator::make($request->all(), [
                 'examinee_id' => 'required|string|max:36|min:36',
-                'date' => 'required|string|date|max:255'
+                'date' => 'required|string|date|max:255',
+                'skills.*.id' => 'required|string|max:36|min:36'
             ]);
 
             if ($validator->fails()) {
@@ -76,6 +77,7 @@ class TestController extends Controller
 
             $examineeId = $request->input('examinee_id');
             $date = $request->input('date');
+            $skillArray = $request->input('skills');
             $recruiterId = auth()->user()->id;
 
             // check if the examinee id is correct
@@ -91,6 +93,20 @@ class TestController extends Controller
                 );
             }
 
+            // check if all of the skills exist
+            for ($i = 0; $i < count($skillArray); $i++) {
+                $skill = Skill::find($skillArray[$i]['id']);
+                if (!$skill) {
+                    return response()->json(
+                        [
+                            'success' => false,
+                            'message' => 'The skill specified is not in database'
+                        ],
+                        Response::HTTP_BAD_REQUEST
+                    );
+                }
+            }
+
             // create the new test
             $test = new Test();
             $test->date = $date;
@@ -100,6 +116,12 @@ class TestController extends Controller
             // attach users in pivot table test_user
             $test->users()->attach($recruiterId, ['user_type' => 'examiner']);
             $test->users()->attach($examineeId, ['user_type' => 'examinee']);
+
+            // attach all of the skills to the test
+            for ($i = 0; $i < count($skillArray); $i++) {
+                $skill = Skill::find($skillArray[$i]['id']);
+                $test->skills()->attach($skill->id, ['mark' => 0]);
+            }
 
             Log::info('Recruiter ' . $recruiterId . ' has scheduled a test for employee ' . $examineeId);
 
