@@ -23,7 +23,7 @@ class PositionController extends Controller
             $positions = Position::query()
                 ->with('skills:id,title,description')
                 ->with('company:id,name,address,email,description')
-                ->with('users:id,email,role_id')
+                ->with('users.skills')
                 ->where('open', true)
                 ->get()
                 ->toArray();
@@ -57,7 +57,7 @@ class PositionController extends Controller
             $position = Position::query()
                 ->with('skills:id,title,description')
                 ->with('company:id,name,address,email,description')
-                ->with('users:id,email,role_id')
+                ->with('users.skills')
                 ->where('open', true)
                 ->find($positionId);
 
@@ -105,7 +105,7 @@ class PositionController extends Controller
                 ->select('positions.id as id', 'positions.title as title', 'positions.company_id as company_id', 'positions.location as location', 'positions.mode as mode', 'positions.salary as salary', 'positions.description as description', 'positions.created_at as release_date')
                 ->with('skills:id,title,description')
                 ->with('company:id,name,address,email,description')
-                ->with('users:id,email,role_id')
+                ->with('users.skills')
                 ->where('open', true)
                 ->where(function ($query) use ($word) {
                     $query
