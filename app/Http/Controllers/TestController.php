@@ -390,6 +390,99 @@ class TestController extends Controller
             );
         }
     }
+    
+    public function evaluateTest(Request $request, $testId)
+    {
+        // set mark in different registers of skill_marks table related to the same test, given by $testId.
+        // this is designed to evaluate all of the skills of a test
+        try {
+            Log::info('evaluating skill: updating mark in skill marks');
+
+            // Validates mark
+            $validator = Validator::make($request->all(), [
+                'skills.*.id' => 'required|string|max:36|min:36',
+                'skills.*.mark' => 'required|Integer|in:0,1,2,3,4,5,6,7,8,9,10'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors()->toJson(), Response::HTTP_BAD_REQUEST);
+            }
+
+            $test = Test::find($testId);
+            $userId = auth()->user()->id;
+
+            // check if the test exists in skill_marks table
+            if (!$test) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Register not found'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if the logged user is the test examiner
+            $examinerId = TestUser::query()
+                ->where('test_id', $testId)
+                ->where('user_type', 'examiner')
+                ->first()
+                ->user_id;
+
+            if ($userId != $examinerId) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'User not allowed to this operation'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // check if all of the skills exist
+            $skillArray = $request->input('skills');
+            for ($i = 0; $i < count($skillArray); $i++) {
+                $skill = Skill::find($skillArray[$i]['id']);
+                if (!$skill) {
+                    return response()->json(
+                        [
+                            'success' => false,
+                            'message' => 'The skill specified is not in database'
+                        ],
+                        Response::HTTP_BAD_REQUEST
+                    );
+                }
+            }
+            
+            // if everything is ok, update the marks (the skills must be already in skill_marks)
+            for ($i = 0; $i < count($skillArray); $i++) {
+                $skillmark = SkillMark::query()->where('skill_id', $skillArray[$i]['id'])->first();
+                if (isset($skillmark)) {
+                    $skillmark->mark = $skillArray[$i]['mark'];
+                    $skillmark->save();
+                }
+            }
+
+            Log::info('Skill marks of test ' . $testId . ' edited');
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Skill marks registered'
+                ]
+            );
+        } catch (\Exception $exception) {
+            Log::error('Error evaluating test: ' . $exception->getMessage());
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error evaluating test'
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 
     public function updateTest(Request $request, $testId)
     {
