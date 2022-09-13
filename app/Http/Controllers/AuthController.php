@@ -135,10 +135,7 @@ class AuthController extends Controller
     {
         $userId =  auth()->user()->id;
         $user = User::query()
-            ->with('skills')
-            ->with('tests.skills')
-            ->with('positions.company')
-            ->with('companies')
+            ->with(['skills', 'tests.skills', 'tests.users', 'positions.company', 'companies'])
             ->find($userId);
 
         Log::info('User ' . $user->email . ' has consulted their personal profile');
