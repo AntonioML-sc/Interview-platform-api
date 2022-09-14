@@ -390,7 +390,7 @@ class TestController extends Controller
             );
         }
     }
-    
+
     public function evaluateTest(Request $request, $testId)
     {
         // set mark in different registers of skill_marks table related to the same test, given by $testId.
@@ -453,7 +453,7 @@ class TestController extends Controller
                     );
                 }
             }
-            
+
             // if everything is ok, update the marks (the skills must be already in skill_marks)
             for ($i = 0; $i < count($skillArray); $i++) {
                 $skillmark = SkillMark::query()->where('skill_id', $skillArray[$i]['id'])->first();
@@ -462,6 +462,10 @@ class TestController extends Controller
                     $skillmark->save();
                 }
             }
+
+            // finally, mark the test as completed
+            $test->completed = true;
+            $test->save();
 
             Log::info('Skill marks of test ' . $testId . ' edited');
 
