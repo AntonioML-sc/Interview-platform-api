@@ -60,9 +60,9 @@ class TestController extends Controller
 
             // validate data provided by request body
             $validator = Validator::make($request->all(), [
-                'examinee_id' => 'required|string|max:36|min:36',
+                'examinee_id' => 'required|uuid',
                 'date' => 'required|string|date|max:255',
-                'skills.*.id' => 'required|string|max:36|min:36'
+                'skills.*.id' => 'required|uuid'
             ]);
 
             if ($validator->fails()) {
@@ -152,8 +152,8 @@ class TestController extends Controller
 
             // Validates skill_id
             $validator = Validator::make($request->all(), [
-                'skill_id' => 'required|string|max:36|min:36',
-                'test_id' => 'required|string|max:36|min:36'
+                'skill_id' => 'required|uuid',
+                'test_id' => 'required|uuid'
             ]);
 
             if ($validator->fails()) {
@@ -241,8 +241,8 @@ class TestController extends Controller
 
             // Validates skill_id
             $validator = Validator::make($request->all(), [
-                'skill_id' => 'required|string|max:36|min:36',
-                'test_id' => 'required|string|max:36|min:36'
+                'skill_id' => 'required|uuid',
+                'test_id' => 'required|uuid'
             ]);
 
             if ($validator->fails()) {
@@ -400,7 +400,7 @@ class TestController extends Controller
 
             // Validates mark
             $validator = Validator::make($request->all(), [
-                'skills.*.id' => 'required|string|max:36|min:36',
+                'skills.*.id' => 'required|uuid',
                 'skills.*.mark' => 'required|Integer|in:0,1,2,3,4,5,6,7,8,9,10'
             ]);
 

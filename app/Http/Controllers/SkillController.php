@@ -290,7 +290,7 @@ class SkillController extends Controller
 
             // Validates skill_id
             $validator = Validator::make($request->all(), [
-                'skill_id' => 'required|string|max:36|min:36'
+                'skill_id' => 'required|uuid'
             ]);
 
             if ($validator->fails()) {
@@ -353,7 +353,7 @@ class SkillController extends Controller
 
             // Validates skill_id
             $validator = Validator::make($request->all(), [
-                'skill_id' => 'required|string|max:36|min:36'
+                'skill_id' => 'required|uuid'
             ]);
 
             if ($validator->fails()) {

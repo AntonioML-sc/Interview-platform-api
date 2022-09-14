@@ -271,8 +271,8 @@ class PositionController extends Controller
 
             // validate data provided by request body
             $validator = Validator::make($request->all(), [
-                'position_id' => 'required|string|max:36|min:36',
-                'skill_id' => 'required|string|max:36|min:36'
+                'position_id' => 'required|uuid',
+                'skill_id' => 'required|uuid'
             ]);
 
             if ($validator->fails()) {
@@ -363,8 +363,8 @@ class PositionController extends Controller
 
             // validate data provided by request body
             $validator = Validator::make($request->all(), [
-                'position_id' => 'required|string|max:36|min:36',
-                'skill_id' => 'required|string|max:36|min:36'
+                'position_id' => 'required|uuid',
+                'skill_id' => 'required|uuid'
             ]);
 
             if ($validator->fails()) {
@@ -453,8 +453,8 @@ class PositionController extends Controller
 
             // validate data provided by request body
             $validator = Validator::make($request->all(), [
-                'position_id' => 'required|string|max:36|min:36',
-                'skills.*.id' => 'required|string|max:36|min:36'
+                'position_id' => 'required|uuid',
+                'skills.*.id' => 'required|uuid'
             ]);
 
             if ($validator->fails()) {
@@ -550,8 +550,8 @@ class PositionController extends Controller
 
             // validate data provided by request body
             $validator = Validator::make($request->all(), [
-                'position_id' => 'required|string|max:36|min:36',
-                'skills.*.id' => 'required|string|max:36|min:36'
+                'position_id' => 'required|uuid',
+                'skills.*.id' => 'required|uuid'
             ]);
 
             if ($validator->fails()) {
