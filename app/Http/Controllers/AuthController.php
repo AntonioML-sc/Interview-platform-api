@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Skill;
+use App\Models\SkillUser;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -194,7 +196,9 @@ class AuthController extends Controller
                 'password' => 'string|min:8|max:255',
                 'phone' => 'string|max:255',
                 'title' => 'string|max:255',
-                'description' => 'string|max:255'
+                'description' => 'string|max:255',
+                'skills_to_attach.*.id' => 'uuid',
+                'skills_to_detach.*.id' => 'uuid'
             ]);
 
             if ($validator->fails()) {
@@ -215,6 +219,8 @@ class AuthController extends Controller
             $phone = $request->input("phone");
             $title = $request->input("title");
             $description = $request->input("description");
+            $skillsToAttach = $request->input("skills_to_attach");
+            $skillsToDetach = $request->input("skills_to_detach");
 
             if (isset($lastName)) {
                 $user->last_name = $lastName;
@@ -256,8 +262,52 @@ class AuthController extends Controller
                 }
             }
 
-            $user->save();
+            // function to check if all of the skills in an array exist
+            function checkSkills($skillArray)
+            {
+                for ($i = 0; $i < count($skillArray); $i++) {
+                    $skill = Skill::find($skillArray[$i]['id']);
+                    if (!$skill) {
+                        return response()->json(
+                            [
+                                'success' => false,
+                                'message' => 'Any of the skills specified is not in database'
+                            ],
+                            Response::HTTP_BAD_REQUEST
+                        );
+                    }
+                }
+            }
 
+            // if there are skills to attach, attach them if validation succeeds
+            if (isset($skillsToAttach)) {
+                checkSkills($skillsToAttach);
+                for ($i = 0; $i < count($skillsToAttach); $i++) {
+                    $userHasSkill = $user->skills->contains($skillsToAttach[$i]['id']);
+                    if (!$userHasSkill) {
+                        $user->skills()->attach($skillsToAttach[$i]['id'], ['creator' => false]);
+                    }
+                }
+                Log::info('Skill list added to user known skills list');
+            }
+
+            // if there are skills to detach, do it if validation succeeds.
+            // User can not detach their created skills
+            if (isset($skillsToDetach)) {
+                checkSkills($skillsToDetach);
+                for ($i = 0; $i < count($skillsToDetach); $i++) {
+                    $skillUser = SkillUser::query()
+                        ->where('skill_id', $skillsToDetach[$i]['id'])
+                        ->where('user_id', $user->id)
+                        ->first();
+                    if (isset($skillUser) && !$skillUser->creator) {
+                        $user->skills()->detach($skillsToDetach[$i]['id']);
+                    }                    
+                }
+                Log::info('Skill list removed from user known skills list');
+            }
+
+            $user->save();
             Log::info('User profile updated successfully. New data: ' . $user);
 
             return response()->json(
@@ -268,7 +318,6 @@ class AuthController extends Controller
                 Response::HTTP_CREATED
             );
         } catch (\Exception $exception) {
-
             Log::error("Error updating profile: " . $exception->getMessage());
 
             return response()->json(
