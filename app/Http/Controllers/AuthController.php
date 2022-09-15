@@ -186,13 +186,13 @@ class AuthController extends Controller
 
             $user = User::query()->find($user_id);
 
-            Log::info('User ' . $user_id . ": " . $user->email . 'updating their profile');
+            Log::info('User ' . $user_id . ": " . $user->email . ' updating their profile');
 
             $validator = Validator::make($request->all(), [
                 'role' => 'string|max:255|in:recruiter,applicant',
                 'last_name' => 'string|max:255',
                 'first_name' => 'string|max:255',
-                'email' => 'string|email|max:255|unique:users',
+                'email' => 'string|email|max:255',
                 'password' => 'string|min:8|max:255',
                 'phone' => 'string|max:255',
                 'title' => 'string|max:255',
@@ -222,6 +222,23 @@ class AuthController extends Controller
             $skillsToAttach = $request->input("skills_to_attach");
             $skillsToDetach = $request->input("skills_to_detach");
 
+            // verify the new email does not belong to any other user.
+            // It does not throw an error if it is the same email that user previously had.
+            if (isset($email)) {
+                $user2 = User::query()->where('email', $email)->first();
+                if (!$user2) {
+                    $user->email = $email;
+                } else if ($user2->id != $user->id) {
+                    return response()->json(
+                        [
+                            'success' => false,
+                            'message' => 'invalid email'
+                        ],
+                        Response::HTTP_BAD_REQUEST
+                    );
+                }
+            }
+            
             if (isset($lastName)) {
                 $user->last_name = $lastName;
             }
@@ -232,10 +249,6 @@ class AuthController extends Controller
 
             if (isset($password)) {
                 $user->password = bcrypt($password);
-            }
-
-            if (isset($email)) {
-                $user->email = $email;
             }
 
             if (isset($phone)) {
@@ -302,7 +315,7 @@ class AuthController extends Controller
                         ->first();
                     if (isset($skillUser) && !$skillUser->creator) {
                         $user->skills()->detach($skillsToDetach[$i]['id']);
-                    }                    
+                    }
                 }
                 Log::info('Skill list removed from user known skills list');
             }
